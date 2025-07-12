@@ -1,0 +1,4 @@
+---
+layout: kanban
+permalink: /kanban
+---

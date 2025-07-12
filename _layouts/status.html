@@ -1,0 +1,30 @@
+---
+layout: default
+---
+<h1>
+  {% if page.status == "unsectioned" %}
+    Unsectioned Notes
+  {% else %}
+    Notes with status: {{ page.status | capitalize }}
+  {% endif %}
+</h1>
+<ul>
+  {% if page.status == "unsectioned" %}
+    {% assign filtered_notes = site.notes | where_exp: "note", "note.status == nil or note.status == ''" %}
+  {% else %}
+    {% assign filtered_notes = site.notes | where: "status", page.status %}
+  {% endif %}
+  {% for note in filtered_notes %}
+    <li>
+      <a href="{{ note.url }}">{{ note.title }}</a>
+      <p>
+        {% assign words = note.long | split: " " %}
+        {% if words.size > 13 %}
+          {{ words | slice: 0, 13 | join: " " }}... <a href="{{ note.url }}">view more</a>
+        {% else %}
+          {{ note.long }}
+        {% endif %}
+      </p>
+    </li>
+  {% endfor %}
+</ul>

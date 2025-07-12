@@ -1,5 +1,6 @@
 ---
 title: Consistency is key
+status: todo
 ---
 
 Show up. Do the work. Be consistent.

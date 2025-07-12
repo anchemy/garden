@@ -1,0 +1,59 @@
+---
+layout: default
+---
+
+<div class="kanban-board" style="display: flex; gap: 2rem;">
+  {% assign statuses = "" | split: "" %}
+  {% for note in site.notes %}
+    {% if note.status %}
+      {% unless statuses contains note.status %}
+        {% assign statuses = statuses | push: note.status %}
+      {% endunless %}
+    {% endif %}
+  {% endfor %}
+
+  {% for status in statuses %}
+    <div class="kanban-column" style="flex: 1; background: #f9f9f9; border-radius: 8px; padding: 1rem;">
+      <h2>{{ status | capitalize }}</h2>
+      {% assign notes = site.notes | where: "status", status | slice: 0, 5 %}
+      {% for note in notes %}
+        <div class="kanban-card" style="margin-bottom: 1rem; background: #fff; border-radius: 4px; padding: 0.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+          <h3 style="margin: 0 0 0.5rem 0;"><a href="{{ note.url }}">{{ note.title }}</a></h3>
+          <p>
+            {% assign words = note.long | split: " " %}
+            {% if words.size > 13 %}
+              {{ words | slice: 0, 13 | join: " " }}... <a href="{{ note.url }}">view more</a>
+            {% else %}
+              {{ note.long }}
+            {% endif %}
+          </p>
+        </div>
+      {% endfor %}
+      <div style="margin-top: 1rem;">
+        <a href="/status/{{ status | downcase | replace: ' ', '-' }}/">View all posts with this status</a>
+      </div>
+    </div>
+  {% endfor %}
+
+  <!-- Unsectioned column for notes with no status -->
+  <div class="kanban-column" style="flex: 1; background: #f9f9f9; border-radius: 8px; padding: 1rem;">
+    <h2>Unsectioned</h2>
+    {% assign unsectioned_notes = site.notes | where_exp: "note", "note.status == nil or note.status == ''" | slice: 0, 5 %}
+    {% for note in unsectioned_notes %}
+      <div class="kanban-card" style="margin-bottom: 1rem; background: #fff; border-radius: 4px; padding: 0.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+        <h3 style="margin: 0 0 0.5rem 0;"><a href="{{ note.url }}">{{ note.title }}</a></h3>
+        <p>
+          {% assign words = note.long | split: " " %}
+          {% if words.size > 13 %}
+            {{ words | slice: 0, 13 | join: " " }}... <a href="{{ note.url }}">view more</a>
+          {% else %}
+            {{ note.long }}
+          {% endif %}
+        </p>
+      </div>
+    {% endfor %}
+    <div style="margin-top: 1rem;">
+      <a href="/status/unsectioned/">View all unsectioned posts</a>
+    </div>
+  </div>
+</div>
