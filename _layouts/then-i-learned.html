@@ -1,0 +1,33 @@
+---
+layout: default
+---
+<h1>Then I Learned</h1>
+{% assign all_notes = site.notes | sort: "published_at_timestamp" | reverse %}
+{% assign last_date = "" %}
+<ul>
+  {% for note in all_notes %}
+    {% assign published_date = note.published_at_timestamp | date: "%B %-d, %Y" %}
+    {% if published_date != last_date %}
+      {% if forloop.index != 1 %}
+        </ul>
+      {% endif %}
+      <h2 style="margin-top:2em;">{{ published_date }}</h2>
+      <br/>
+      <ul>
+      {% assign last_date = published_date %}
+    {% endif %}
+    <li>
+      <a href="{{ note.url }}">{{ note.title }}</a>
+      <p>
+        {% assign words = note.long | split: " " %}
+        {% if words.size > 13 %}
+          {{ words | slice: 0, 13 | join: " " }}... <a href="{{ note.url }}">view more</a>
+        {% else %}
+          {{ note.long }}
+        {% endif %}
+      </p>
+    </li>
+    {% if forloop.last %}
+      </ul>
+    {% endif %}
+  {% endfor %}

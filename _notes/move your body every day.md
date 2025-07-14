@@ -1,5 +1,7 @@
 ---
 status: complete
+topics:
+    - default notes
 ---
 
 Move your body every day. Benefits include:

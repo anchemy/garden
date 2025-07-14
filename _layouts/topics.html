@@ -1,0 +1,38 @@
+---
+layout: default
+---
+<h1>Topics</h1>
+{% assign all_topics = "" | split: "" %}
+{% for note in site.notes %}
+  {% if note.topics %}
+    {% for topic in note.topics %}
+      {% unless all_topics contains topic %}
+        {% assign all_topics = all_topics | push: topic %}
+      {% endunless %}
+    {% endfor %}
+  {% endif %}
+{% endfor %}
+{% assign sorted_topics = all_topics | sort %}
+
+<style>
+.topics-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1em;
+  margin: 2em 0;
+}
+.topics-grid li {
+  list-style: none;
+  margin: 0;
+  padding: 0.5em 0;
+  text-align: left;
+}
+</style>
+
+<ul class="topics-grid">
+  {% for topic in sorted_topics %}
+    <li>
+      <a href="/topics/{{ topic | downcase | replace: ' ', '-' }}/">{{ topic }}</a>
+    </li>
+  {% endfor %}
+</ul>

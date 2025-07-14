@@ -1,6 +1,8 @@
 ---
 title: Your first seed
 status: wip
+topics:
+    - default notes
 ---
 
 ### Welcome!

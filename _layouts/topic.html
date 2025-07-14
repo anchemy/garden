@@ -1,0 +1,21 @@
+---
+layout: default
+---
+<h1>Notes discussing the topic: "{{ page.topic }}"</h1>
+<ul>
+  {% for note in site.notes %}
+    {% if note.topics and note.topics contains page.topic %}
+      <li>
+        <a href="{{ note.url }}">{{ note.title }}</a>
+        <p>
+          {% assign words = note.long | split: " " %}
+          {% if words.size > 13 %}
+            {{ words | slice: 0, 13 | join: " " }}... <a href="{{ note.url }}">view more</a>
+          {% else %}
+            {{ note.long }}
+          {% endif %}
+        </p>
+      </li>
+    {% endif %}
+  {% endfor %}
+</ul>

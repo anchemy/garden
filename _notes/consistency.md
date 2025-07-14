@@ -1,6 +1,8 @@
 ---
 title: Consistency is key
 status: todo
+topics:
+    - default notes
 ---
 
 Show up. Do the work. Be consistent.

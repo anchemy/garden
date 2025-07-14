@@ -1,5 +1,8 @@
 ---
 title: A note about cats
+topics:
+    - animal
+    - pet
 ---
 
 This is a second note with a poem with cats. 
