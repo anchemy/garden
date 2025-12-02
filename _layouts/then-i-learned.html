@@ -1,33 +1,358 @@
 ---
 layout: default
 ---
-<h1>Then I Learned</h1>
-{% assign all_notes = site.notes | sort: "published_at_timestamp" | reverse %}
-{% assign last_date = "" %}
-<ul>
-  {% for note in all_notes %}
-    {% assign published_date = note.published_at_timestamp | date: "%B %-d, %Y" %}
-    {% if published_date != last_date %}
-      {% if forloop.index != 1 %}
-        </ul>
+<h1>Then I Learned - Archive</h1>
+
+<p>A calendar view of all your changelog entries over time.</p>
+
+<style>
+  .calendar-container {
+    margin: 2em 0;
+    overflow-x: auto;
+  }
+
+  .calendar-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 2em 0;
+    background: white;
+  }
+
+  .calendar-table th {
+    background: #8b88e6;
+    color: white;
+    padding: 1em;
+    text-align: center;
+    font-weight: bold;
+  }
+
+  .calendar-table td {
+    border: 1px solid #ddd;
+    padding: 1em;
+    height: 120px;
+    vertical-align: top;
+    background: #fafafa;
+  }
+
+  .calendar-table td.other-month {
+    background: #f0f0f0;
+    color: #ccc;
+  }
+
+  .calendar-table td.has-entries {
+    background: #efefff;
+  }
+
+  .calendar-date {
+    font-weight: bold;
+    margin-bottom: 0.5em;
+    color: #333;
+  }
+
+  .calendar-entries {
+    font-size: 0.85em;
+  }
+
+  .calendar-entry {
+    margin: 0.3em 0;
+    padding: 0.3em;
+    color: #666;
+    line-height: 1.3;
+  }
+
+  .view-more-btn {
+    color: #8b88e6;
+    cursor: pointer;
+    text-decoration: underline;
+    margin-top: 0.5em;
+    display: inline-block;
+    font-weight: 500;
+  }
+
+  .view-more-btn:hover {
+    color: #6b68d6;
+  }
+
+  /* Modal Styles */
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    animation: fadeIn 0.3s ease;
+  }
+
+  .modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .modal-content {
+    background-color: white;
+    padding: 2em;
+    border-radius: 8px;
+    max-width: 500px;
+    max-height: 70vh;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    animation: slideIn 0.3s ease;
+  }
+
+  @keyframes slideIn {
+    from {
+      transform: translateY(-50px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 1em;
+    right: 1em;
+    font-size: 2em;
+    cursor: pointer;
+    color: #999;
+    border: none;
+    background: none;
+    padding: 0;
+    line-height: 1;
+  }
+
+  .modal-close:hover {
+    color: #333;
+  }
+
+  .modal-header {
+    margin-bottom: 1.5em;
+    margin-top: 0.5em;
+  }
+
+  .modal-header h2 {
+    margin: 0;
+    color: #333;
+  }
+
+  .modal-entry {
+    margin: 1em 0;
+    padding: 1em;
+    background: #f9f9f9;
+    border-left: 3px solid #8b88e6;
+    border-radius: 3px;
+  }
+
+  .modal-entry-title {
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 0.3em;
+  }
+
+  .modal-entry-note {
+    color: #666;
+    font-size: 0.9em;
+    margin-bottom: 0.3em;
+  }
+</style>
+
+<div class="calendar-container">
+  {% assign all_entries = site.data.changelog_entries_by_date | default: empty_hash %}
+  
+  {% if all_entries.size > 0 %}
+    <!-- Calendar Navigation will be added here for multi-month view -->
+    
+    {% assign calendar_entries = all_entries %}
+    
+    <table class="calendar-table">
+      <thead>
+        <tr>
+          <th>Sun</th>
+          <th>Mon</th>
+          <th>Tue</th>
+          <th>Wed</th>
+          <th>Thu</th>
+          <th>Fri</th>
+          <th>Sat</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Calendar weeks will be generated here -->
+        {% assign current_date = site.time | date: "%Y-%m-01" | date_to_time %}
+        {% assign last_day = site.time | date: "%d" | plus: 0 %}
+        {% assign month_start_day = current_date | date: "%w" %}
+        
+        <!-- Generate weeks -->
+        {% assign day = 1 %}
+        {% assign week_day = month_start_day %}
+        
+        <tr>
+          {% for empty in (1..month_start_day) %}
+            <td class="other-month"></td>
+          {% endfor %}
+          
+          {% assign remaining_days = 7 | minus: month_start_day %}
+          {% for i in (1..remaining_days) %}
+            {% assign current_date_str = site.time | date: "%Y-%m" | append: "-" | append: day | date_to_time | date: "%Y-%m-%d" %}
+            {% assign entries_for_date = calendar_entries[current_date_str] | default: empty_array %}
+            
+            <td {% if entries_for_date.size > 0 %}class="has-entries"{% endif %}>
+              <div class="calendar-date">{{ day }}</div>
+              
+              {% if entries_for_date.size > 0 %}
+                <div class="calendar-entries">
+                  {% if entries_for_date.size <= 3 %}
+                    {% for entry in entries_for_date %}
+                      <div class="calendar-entry">
+                        <strong>{{ entry.note_title }}</strong> - {{ entry.entry_title }}
+                      </div>
+                    {% endfor %}
+                  {% else %}
+                    {% for entry in entries_for_date | slice: 0, 3 %}
+                      <div class="calendar-entry">
+                        <strong>{{ entry.note_title }}</strong> - {{ entry.entry_title }}
+                      </div>
+                    {% endfor %}
+                    <div class="view-more-btn" onclick="openModal('date-{{ current_date_str }}')">
+                      View More... ({{ entries_for_date.size | minus: 3 }} more)
+                    </div>
+                  {% endif %}
+                </div>
+              {% endif %}
+            </td>
+            
+            {% assign day = day | plus: 1 %}
+          {% endfor %}
+        </tr>
+        
+        <!-- Continue generating weeks for remaining days -->
+        {% assign week_day = remaining_days %}
+        {% for week in (1..10) %}
+          {% if day <= last_day %}
+            <tr>
+              {% for i in (1..7) %}
+                {% if day <= last_day %}
+                  {% assign current_date_str = site.time | date: "%Y-%m" | append: "-" | append: day | date_to_time | date: "%Y-%m-%d" %}
+                  {% assign entries_for_date = calendar_entries[current_date_str] | default: empty_array %}
+                  
+                  <td {% if entries_for_date.size > 0 %}class="has-entries"{% endif %}>
+                    <div class="calendar-date">{{ day }}</div>
+                    
+                    {% if entries_for_date.size > 0 %}
+                      <div class="calendar-entries">
+                        {% if entries_for_date.size <= 3 %}
+                          {% for entry in entries_for_date %}
+                            <div class="calendar-entry">
+                              <strong>{{ entry.note_title }}</strong> - {{ entry.entry_title }}
+                            </div>
+                          {% endfor %}
+                        {% else %}
+                          {% for entry in entries_for_date | slice: 0, 3 %}
+                            <div class="calendar-entry">
+                              <strong>{{ entry.note_title }}</strong> - {{ entry.entry_title }}
+                            </div>
+                          {% endfor %}
+                          <div class="view-more-btn" onclick="openModal('date-{{ current_date_str }}')">
+                            View More... ({{ entries_for_date.size | minus: 3 }} more)
+                          </div>
+                        {% endif %}
+                      </div>
+                    {% endif %}
+                  </td>
+                  
+                  {% assign day = day | plus: 1 %}
+                {% else %}
+                  <td class="other-month"></td>
+                {% endif %}
+              {% endfor %}
+            </tr>
+          {% endif %}
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <!-- Modals for each date -->
+    {% for date_entries in calendar_entries %}
+      {% assign date_key = date_entries[0] %}
+      {% assign entries_list = date_entries[1] %}
+      
+      {% if entries_list.size > 3 %}
+        <div id="date-{{ date_key }}" class="modal">
+          <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('date-{{ date_key }}')">✕</button>
+            <div class="modal-header">
+              <h2>{{ date_key | date: "%B %-d, %Y" }}</h2>
+            </div>
+            
+            {% for entry in entries_list %}
+              <div class="modal-entry">
+                <div class="modal-entry-title">{{ entry.entry_title }}</div>
+                <div class="modal-entry-note"><strong>{{ entry.note_title }}</strong></div>
+                <div style="font-size: 0.85em; color: #999;">
+                  {% if entry.date_published == entry.date_updated %}
+                    {{ entry.date_published | date: "%b %-d, %Y" }}
+                  {% else %}
+                    {{ entry.date_published | date: "%b %-d, %Y" }} - {{ entry.date_updated | date: "%b %-d, %Y" }}
+                  {% endif %}
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
       {% endif %}
-      <h2 style="margin-top:2em;">{{ published_date }}</h2>
-      <br/>
-      <ul>
-      {% assign last_date = published_date %}
-    {% endif %}
-    <li>
-      <a href="{{ note.url }}">{{ note.title }}</a>
-      <p>
-        {% assign words = note.long | split: " " %}
-        {% if words.size > 13 %}
-          {{ words | slice: 0, 13 | join: " " }}... <a href="{{ note.url }}">view more</a>
-        {% else %}
-          {{ note.long }}
-        {% endif %}
-      </p>
-    </li>
-    {% if forloop.last %}
-      </ul>
-    {% endif %}
-  {% endfor %}
+    {% endfor %}
+  {% else %}
+    <p style="color: #888;">
+      No changelog entries found yet. Start documenting your changes! 📝
+    </p>
+  {% endif %}
+</div>
+
+<script>
+  function openModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+      modal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+  }
+
+  function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+      modal.classList.remove('active');
+      document.body.style.overflow = 'auto';
+    }
+  }
+
+  // Close modal when clicking outside of it
+  window.addEventListener('click', function(event) {
+    if (event.target.classList.contains('modal')) {
+      event.target.classList.remove('active');
+      document.body.style.overflow = 'auto';
+    }
+  });
+
+  // Close modal with Escape key
+  window.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+      const activeModal = document.querySelector('.modal.active');
+      if (activeModal) {
+        activeModal.classList.remove('active');
+        document.body.style.overflow = 'auto';
+      }
+    }
+  });
+</script>

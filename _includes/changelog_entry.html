@@ -1,0 +1,22 @@
+<div class="changelog-entry" style="margin: 2em 0; padding: 1.5em; background: #f9f9f9; border-left: 4px solid #8b88e6; border-radius: 4px;">
+  <h3 style="margin-top: 0;">{{ include.title }}</h3>
+  
+  <p style="color: #666; font-size: 0.9em; margin: 0.5em 0;">
+    {% if include.date_published %}
+      Created: {{ include.date_published | date: "%B %-d, %Y" }}
+    {% endif %}
+    {% if include.date_updated %}
+      | Updated: {{ include.date_updated | date: "%B %-d, %Y" }}
+    {% endif %}
+  </p>
+
+  {% if include.actions %}
+    <div style="margin-top: 1em;">
+      {% for action in include.actions %}
+        <div style="margin: 0.8em 0; padding: 0.8em; background: white; border-radius: 3px;">
+          <strong style="color: #8b88e6;">{{ action.type }}:</strong> {{ action.description }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>

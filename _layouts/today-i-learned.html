@@ -1,37 +1,24 @@
 ---
 layout: default
 ---
-{% assign tz_offset = 8 %}
-{% assign now = 'now' | date: "%s" %}
-{% assign today = now | plus: tz_offset | date: "%B %-d, %Y" %}
-
-{% assign todays_notes = "" | split: "" %}
-{% for note in site.notes %}
-  {% assign published_date = note.published_at_timestamp | date: "%B %-d, %Y" %}
-  {% if published_date == today %}
-    {% assign todays_notes = todays_notes | push: note %}
-  {% endif %}
-{% endfor %}
-
 <h1>Today I Learned</h1>
-{% if todays_notes.size == 0 %}
-  <p>No entry for the day.</p>
-{% else %}
+
+{% assign today_entries = site.data.today_changelog_entries | default: empty_array %}
+
+{% if today_entries.size > 0 %}
+  <p>Changes made on {{ site.time | date: "%B %-d, %Y" }}:</p>
   <ul>
-    {% for note in todays_notes %}
+    {% for entry in today_entries %}
       <li>
-        <a href="{{ note.url }}">{{ note.title }}</a>
-        <p>
-          {% assign words = note.long | split: " " %}
-          {% if words.size > 13 %}
-            {{ words | slice: 0, 13 | join: " " }}... <a href="{{ note.url }}">view more</a>
-          {% else %}
-            {{ note.long }}
-          {% endif %}
-        </p>
+        <strong>{{ entry.note_title }}</strong> - {{ entry.entry_title }}
       </li>
     {% endfor %}
   </ul>
+  <p style="color: #888;">
+    For archived TILs, head <a href="then-i-learned.html">here</a>.
+  </p>
+{% else %}
+  <p style="color: #888;">
+    No changes recorded for today. Keep learning! 📚
+  </p>
 {% endif %}
-
-<p>For previous TILs, head to the <a class="internal-link" href="{{ site.baseurl }}/til-archive">TIL Archive</a> page.</p>

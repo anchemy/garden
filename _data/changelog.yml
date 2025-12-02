@@ -1,0 +1,21 @@
+# Example changelog actions data file
+# This demonstrates the structure for changelog entries
+changelog_actions_example_1:
+  - type: "Added"
+    description: "Initial note creation with basic documentation"
+  - type: "Added"
+    description: "Link syntax examples and templates"
+
+changelog_actions_example_2:
+  - type: "Revised"
+    description: "Updated link syntax section with additional examples"
+  - type: "Added"
+    description: "Added information about non-latin language support"
+
+changelog_actions_example_3:
+  - type: "Revised"
+    description: "Improved code syntax highlighting examples"
+  - type: "Added"
+    description: "Added media embedding documentation"
+  - type: "Deleted"
+    description: "Removed deprecated link syntax examples"

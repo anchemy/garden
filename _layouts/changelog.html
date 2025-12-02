@@ -1,0 +1,24 @@
+---
+layout: default
+---
+
+<article>
+  <div>
+    <h1>{{ page.title }}</h1>
+    <p style="color: #666; margin-top: 0.5em;">Changelog for: <a class="internal-link" href="{{ page.note_url }}">{{ page.note_title }}</a></p>
+  </div>
+
+  <div id="changelog-container">
+    <content>
+      {{ content }}
+    </content>
+  </div>
+
+  <hr>
+
+  <div style="font-size: 0.9em; color: #888;">
+    <p>
+      <a class="internal-link" href="{{ page.note_url }}">← Back to note</a>
+    </p>
+  </div>
+</article>

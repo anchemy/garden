@@ -3,6 +3,7 @@ title: Your first seed
 status: wip
 topics:
     - default notes
+changelog_url: /changelogs/your-first-note/
 ---
 
 ### Welcome!
